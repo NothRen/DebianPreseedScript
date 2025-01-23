@@ -1,8 +1,17 @@
 #!/bin/sh
-# Tableau qui contient les packages nécessaires pour l'éxecution du script
-needed_packages=("xorriso" "genisoimage")
-working_directory="./buildPressed/"
-complete_auto_install=0
+
+
+needed_packages=("xorriso" "genisoimage" "sed") # Tableau qui contient les packages nécessaires pour l'éxecution du script
+working_directory="./buildPressed/" # Dossier ou l'on va décompresser l'iso et faire les manipulations
+complete_auto_install=0 # Flag pour savoir si on fait une auto installation complète ou non
+
+# On met les arguments dans des variables pour faciliter la lisibilité
+preseed_file=$1 # Le chemin vers le fichier preseed
+preseed_file_name=$(basename $preseed_file) # Le nom du fichier preseed
+iso_file=$2 # Le chemin vers le fichier iso
+iso_file_name=$(basename $iso_file) # Le nom du fichier iso
+output_file=$3 # Le chemin de sortie (optionnelle. Si il n'est pas précisé, on prend le dossier d'où le script est éxécuté)
+output_file_name=${iso_file_name::-4}"_preseeded.iso" # Le nom que l'iso de sortie aura
 
 #Fonction qui vérifie si les packages nécessaires sont présent
 check_needed_packages(){
@@ -43,14 +52,6 @@ ask_for_auto_install(){
 	esac
 }
 
-# On met les arguments dans des variables pour faciliter la lisibilité
-preseed_file=$1
-preseed_file_name=$(basename $preseed_file)
-iso_file=$2
-iso_file_name=$(basename $iso_file)
-output_file=$3
-output_file_name=${iso_file_name::-4}"_preseeded.iso"
-
 # On vérifie si il y a bien au moins 2 arguments
 if [[ $# < 2 ]]; then
 	echo "Au moins 2 arguments sont nécessaire : le chemin vers le fichier preseed(.cfg) en premier et le chemin vers le ficher iso(.iso) en second. On peut rajouter le chemin d'ouput de l'iso modifier en troisième"
@@ -86,7 +87,7 @@ if [[ -z $output_file ]];then
 	output_file=$PWD
 fi
 
-# On ajoute le nom de l'iso suivi de _preseeded au chemin de destination
+# On ajoute le nom de sortie de l'iso au chemin de sortie
 output_file=$output_file"/"$output_file_name
 
 # On vérifie si les packages nécessaires sont installés
@@ -95,9 +96,10 @@ check_needed_packages
 # On demande si il faut faire une installation complète
 ask_for_auto_install
 
-# On vérifie si le dossier existe, si il existe on demande de le supprimer
-if [ -d $working_directory ] && [ 0 = 1 ]; then
+# On vérifie si le dossier de "travaille" existe, si il existe on demande de le supprimer
+if [ -d $working_directory ]; then
 	echo "Veuillez supprimer le dossier $working_directory"
+	exit
 fi
 
 # On unpack l'iso avec xorriso
@@ -117,22 +119,16 @@ EOF
 # On ajoute le fichier que l'on vient de créer à la fin de la liste des menus
 echo "include preseedMenu.cfg" >> ${working_directory}isolinux/menu.cfg
 
-
-sed 's/a.*//' file
-
-
 # On copie le preseed dans l'iso
 cp $preseed_file $working_directory
  
-# TODO 
-# Si l'auto install complete à été sélectionné
-#if [ complete_auto_install = 0 ]
-#	default install prompt 0 timeout 0
-#	sed 's/default.*//' $working_directory"isolinux/isolinux.cfg" >> $working_directory"isolinux/isolinux.cfg"
-#fi
+# Si l'auto install complete à été sélectionné, on remplace la ligne "default..." par "default preseed" dans isolinux.cfg
+if [ $complete_auto_install = 1 ]; then
+	sed -i 's/default.*/default preseed/g' $working_directory"isolinux/isolinux.cfg"
+	echo "auto install"
+fi
 
-
-# On recompresse l'iso 
+# On recompresse l'iso
 mkisofs -o $output_file_name -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -R -V "Debian preseed" $working_directory
 
 # On supprime le dossier
