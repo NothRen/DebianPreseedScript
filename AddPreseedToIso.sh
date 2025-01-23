@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-needed_packages=("xorriso" "genisoimage" "sed") # Tableau qui contient les packages nécessaires pour l'éxecution du script
+needed_packages=("xorriso" "genisoimage") # Tableau qui contient les packages nécessaires pour l'éxecution du script
 working_directory="./buildPressed/" # Dossier ou l'on va décompresser l'iso et faire les manipulations
 complete_auto_install=0 # Flag pour savoir si on fait une auto installation complète ou non
 
@@ -111,7 +111,7 @@ chmod -R +rw $working_directory
 # On crée le fichier qui va contenir l'entrée du menu pour utiliser le preseed
 cat > ${working_directory}isolinux/preseedMenu.cfg << EOF
 label preseed
-	menu label ^Preseed
+	menu label ^Utiliser le fichier preseed
 	kernel /install.amd/vmlinuz
 	append vga=788 initrd=/install.amd/initrd.gz auto=true file=/cdrom/preseed.cfg --- quiet
 EOF
@@ -129,7 +129,7 @@ if [ $complete_auto_install = 1 ]; then
 fi
 
 # On recompresse l'iso
-mkisofs -o $output_file_name -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -R -V "Debian preseed" $working_directory
+mkisofs -o $output_file -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -R -V "Debian preseed" $working_directory
 
 # On supprime le dossier
 rm -rf $working_directory
