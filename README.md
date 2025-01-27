@@ -15,10 +15,10 @@ Pour générer un preseed à partir d'une installation existante de Debian, vous
 
 ```debconf-get-selections --installer```
 
-Note : Le fichier preseed dans le repo est basé sur [ce preseed](https://www.debian.org/releases/stable/example-preseed.txt). Je ne recommande pas de l'utiliser dans l'état
+Note : Le fichier preseed dans le repo est basé sur [ce preseed](https://www.debian.org/releases/stable/example-preseed.txt). Je ne recommande pas de l'utiliser dans l'état.
 
 ## Packages nécessaires :
-Les packages apt suivants sont nécessaires pour éxécuté le script :
+Les packages apt suivants sont nécessaires pour exécuter le script :
 
 | Packages | Versions |
 | ------- | ------- |
@@ -29,7 +29,7 @@ Vous pourrez peut-être utiliser le script avec des versions plus anciennes des 
 
 
 ## Utilisation :
-Pour éxécuter le script :
+Pour exécuter le script :
 1. Avoir une distribution basée sur Debian
 2. Télécharger une [image netinst de Debian](https://www.debian.org/distrib/netinst)
 3. Créer un fichier [preseed](https://wiki.debian.org/fr/DebianInstaller/Preseed) qui corresponde à votre besoin. ([Exemple de preseed](https://www.debian.org/releases/stable/example-preseed.txt))
@@ -41,7 +41,7 @@ Pour éxécuter le script :
 
 
 
-## Lien utiles :
+## Liens utiles :
 Liste non exhaustive de liens qui m'ont aidé :
 
 - https://gist.github.com/AkdM/2cd3766236582ed0263920d42c359e0f
