@@ -29,7 +29,7 @@ check_needed_packages(){
 	
 	# Si il manque un package ou plus on finit le programme
 	if [[ ! $package_missing -eq 0 ]];then
-		exit
+		exit 1
 	fi
 }
 
@@ -47,8 +47,8 @@ ask_for_auto_install(){
 	# Sinon on met un message d'erreur et on fini le program
 	case "$answer" in
 		oui | Oui | o | O | yes | Yes | y | Y ) complete_auto_install=1;;
-		non | Non | n | N | no | No | n | N ) complete_auto_install=0;;
-		* ) echo "Veuillez répondre oui ou non";exit ;;
+		non | Non | n | N | no | No  ) complete_auto_install=0;;
+		* ) echo "Veuillez répondre oui ou non";exit 1 ;;
 	esac
 }
 
@@ -61,31 +61,31 @@ clear_folder(){
 # On vérifie si il y a bien au moins 2 arguments
 if [[ $# < 2 ]]; then
 	echo "Au moins 2 arguments sont nécessaire : le chemin vers le fichier preseed(.cfg) en premier et le chemin vers le ficher iso(.iso) en second. On peut rajouter le chemin d'ouput de l'iso modifier en troisième"
-	exit
+	exit 1
 fi
 
 # On vérifie si le premier argument est bien un fichier .cfg
 if [[ $preseed_file != *.cfg ]]; then
 	echo "Le premier argument doit être un fichier preseed avec .cfg comme extension"
-	exit
+	exit 1
 fi
 
 # On vérifie si le fichier preseed existe
 if [[ ! -f $preseed_file ]]; then
 	echo "Le fichier preseed n'existe pas"
-	exit
+	exit 1
 fi
 
 # On vérifie si le second argument est bien un fichier .iso
 if [[ $iso_file != *.iso ]]; then
 	echo "Le second argument doit être un fichier iso avec .iso comme extension"
-	exit
+	exit 1
 fi
 
 # On vérifie si le fichier iso existe
 if [[ ! -f $iso_file ]]; then
 	echo "Le fichier iso n'existe pas"
-	exit
+	exit 1
 fi
 
 # Si il n'y a pas de troisième arguments (pour le chemin de sortie), on dit que le chemin de sortie et le dossier actuel
@@ -105,7 +105,7 @@ ask_for_auto_install
 # On vérifie si le dossier de "travaille" existe, si il existe on demande de le supprimer
 if [ -d $working_directory ]; then
 	echo "Veuillez supprimer le dossier $working_directory"
-	exit
+	exit 1
 fi
 
 # On unpack l'iso avec xorriso
@@ -119,7 +119,7 @@ chmod -R +rw $working_directory
 if [[ isXorrisoSuccessful -ne 0 ]]; then
 	echo "Une erreur est survenue"
 	clear_folder
-	exit
+	exit 1
 fi
 
 # On crée le fichier qui va contenir l'entrée du menu pour utiliser le preseed
@@ -152,5 +152,5 @@ clear_folder
 echo "===================================="
 echo "L'iso modifié est ici : $output_file"
 
-
+exit 0
 
