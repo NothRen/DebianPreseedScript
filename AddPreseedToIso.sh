@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 
 needed_packages=("xorriso" "genisoimage") # Tableau qui contient les packages nécessaires pour l'éxecution du script
@@ -50,6 +50,12 @@ ask_for_auto_install(){
 		non | Non | n | N | no | No | n | N ) complete_auto_install=0;;
 		* ) echo "Veuillez répondre oui ou non";exit ;;
 	esac
+}
+
+
+clear_folder(){
+	# On supprime le dossier de travail
+	rm -rf $working_directory
 }
 
 # On vérifie si il y a bien au moins 2 arguments
@@ -105,8 +111,16 @@ fi
 # On unpack l'iso avec xorriso
 xorriso -osirrox on -indev $iso_file -extract / $working_directory
 
+isXorrisoSuccessful=$?
+
 # On donne les permissions de lecture et d'écriture à tout les fichier de l'iso
 chmod -R +rw $working_directory
+
+if [[ isXorrisoSuccessful -ne 0 ]]; then
+	echo "Une erreur est survenue"
+	clear_folder
+	exit
+fi
 
 # On crée le fichier qui va contenir l'entrée du menu pour utiliser le preseed
 cat > ${working_directory}isolinux/preseedMenu.cfg << EOF
@@ -131,9 +145,7 @@ fi
 # On recompresse l'iso
 mkisofs -o $output_file -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -R -V "Debian preseed" $working_directory
 
-# On supprime le dossier
-rm -rf $working_directory
-
+clear_folder
 
 
 # Info de fin
